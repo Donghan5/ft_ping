@@ -20,10 +20,10 @@ static uint16_t	ft_checksum(uint16_t *buffer, int size)
 void	ft_make_icmp_packet(t_ping_info *info)
 {
 	struct icmphdr	*icmp;
-	int total_size;
+	int		total_size;
+	char	buffer[total_size];
 
 	total_size = sizeof(struct icmphdr) + info->packet_size;
-	char buffer[total_size];
 
 	memset(buffer, 0, total_size);
 	icmp = (struct icmphdr *)buffer;
@@ -41,4 +41,24 @@ void	ft_make_icmp_packet(t_ping_info *info)
 		perror("sendto");
 	info->sent++;
 	info->sequence++;
+}
+
+void	ft_receive_icmp_packet(t_ping_info *info)
+{
+	char	buffer[1024];
+
+	if (recvfrom(info->socket, buffer, sizeof(buffer), 0, NULL, NULL) == -1)
+	{
+		perror("ft_ping: recvfrom error");
+		return ;
+	}
+
+	// --- receive time --- //
+	gettimeofday(&info->recv_time, NULL);
+
+	// --- skip ip header and check icmp header --- //
+	
+	// --- verify type, identifier --- //
+
+	// --- calculate rtt and update stats --- //
 }
