@@ -46,19 +46,34 @@ void	ft_make_icmp_packet(t_ping_info *info)
 void	ft_receive_icmp_packet(t_ping_info *info)
 {
 	char	buffer[1024];
-
+	struct iphdr	*ip;
+	struct icmphdr	*icmp;
+	
 	if (recvfrom(info->socket, buffer, sizeof(buffer), 0, NULL, NULL) == -1)
 	{
 		perror("ft_ping: recvfrom error");
 		return ;
 	}
-
+	
 	// --- receive time --- //
 	gettimeofday(&info->recv_time, NULL);
-
+	
 	// --- skip ip header and check icmp header --- //
 	
+	ip = (struct iphdr *)buffer;
+	icmp = (struct icmphdr *)(buffer + (ip->ihl * 4));
+	
 	// --- verify type, identifier --- //
+	if (icmp->type != ICMP_ECHOREPLY)
+	{
+		fprintf(1, "Fail to check the type. Please verify it");
+		exit(1);
+	}
 
+	if (icmp->un.echo.id == getpid())
+	{
+		fprintf(1, "Not match the process. Please verify it");
+		exit(1);
+	}
 	// --- calculate rtt and update stats --- //
 }
