@@ -73,5 +73,9 @@ void	ft_print_stats(t_ping_info *info);
 // --- socket --- //
 void	ft_create_socket(t_ping_info *info);
 
+// --- icmp --- //
+void    ft_make_icmp_packet(t_ping_info *info);
+void    ft_receive_icmp_packet(t_ping_info *info);
+
 #endif
 // --- end of ft_ping.h --- //

@@ -11,9 +11,12 @@ int main(int argc, char **argv)
     }
 
     // --- init ping info --- //
+    t_ping_info info;
+    ft_init_ping_info(&info);
     
     // --- init signal handler --- //
-
+    ft_init_signal_handler();
+    
     // --- parse arguments --- //
 
     // --- socket open --- //

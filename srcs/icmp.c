@@ -48,6 +48,9 @@ void	ft_receive_icmp_packet(t_ping_info *info)
 	char	buffer[1024];
 	struct iphdr	*ip;
 	struct icmphdr	*icmp;
+	struct timeval	recv_time;
+	struct timeval	send_time;
+	double rtt;
 	
 	if (recvfrom(info->socket, buffer, sizeof(buffer), 0, NULL, NULL) == -1)
 	{
@@ -66,14 +69,26 @@ void	ft_receive_icmp_packet(t_ping_info *info)
 	// --- verify type, identifier --- //
 	if (icmp->type != ICMP_ECHOREPLY)
 	{
-		fprintf(1, "Fail to check the type. Please verify it");
-		exit(1);
+		if (info->flags & FLAG_VERBOSE)
+			fprintf(stderr, "Fail to check the type. Please verify it");
+		return;
 	}
 
-	if (icmp->un.echo.id == getpid())
+	if (icmp->un.echo.id != getpid())
 	{
-		fprintf(1, "Not match the process. Please verify it");
-		exit(1);
+		if (info->flags & FLAG_VERBOSE)
+			fprintf(stderr, "Not match the process. Please verify it");
+		return;
 	}
 	// --- calculate rtt and update stats --- //
+	send_time = info->send_time;
+	recv_time = info->recv_time;
+	rtt = (recv_time.tv_sec - send_time.tv_sec) * 1000.0 + (recv_time.tv_usec - send_time.tv_usec) / 1000.0;
+	
+	info->received++;
+	info->total_rtt += rtt;
+	if (rtt < info->min_rtt || info->min_rtt == 0)
+		info->min_rtt = rtt;
+	if (rtt > info->max_rtt)
+		info->max_rtt = rtt;
 }
